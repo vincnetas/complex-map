@@ -255,6 +255,7 @@ function redraw()
 	zContext.clearRect(0, 0, zContext.canvas.width, zContext.canvas.height); // Clears the zCanvas
 	zContext.lineWidth = AXISWIDTH;
 	zContext.strokeStyle = "#000000";
+
 	//axes
 	zContext.beginPath();
 	zContext.moveTo(0,zCanvas.height/2);
@@ -268,6 +269,23 @@ function redraw()
 	zContext.closePath();
 	zContext.stroke();
 	//
+
+	for (var x = 0; x < zCanvas.width; x = x + 10) {
+		zContext.beginPath();
+		zContext.moveTo(x, 0);
+		zContext.lineTo(x, zCanvas.height);
+		zContext.closePath();
+		zContext.stroke();	
+	}
+
+	for (var y = 0; y < zCanvas.height; y = y + 10) {
+		zContext.beginPath();
+		zContext.moveTo(0, y);
+		zContext.lineTo(zCanvas.width, y);
+		zContext.closePath();
+		zContext.stroke();
+		}
+
 	zContext.lineJoin = "round";
 	zContext.lineWidth = STROKEWIDTH;
 			
@@ -293,69 +311,99 @@ function redraw()
 
 function wMap()
 {
-	wContext.clearRect(0,0,wCanvas.width,wCanvas.height);
-	wContext.lineWidth = AXISWIDTH;
-	wContext.strokeStyle = "#000000";
-	//axes
-	wContext.beginPath();
-	wContext.moveTo(0,wCanvas.height/2);
-	wContext.lineTo(wCanvas.width,wCanvas.height/2);
-	wContext.closePath();
-	wContext.stroke();
-	// other axis
-	wContext.beginPath();
-	wContext.moveTo(wCanvas.width/2,0);
-	wContext.lineTo(wCanvas.width/2,wCanvas.height);
-	wContext.closePath();
-	wContext.stroke();
-	//
-	var zplane = zContext.getImageData(0,0,zCanvas.width,zCanvas.height);
-	var data = zplane.data;
-	var prevx = -1;
-	var prevy = -1;
-	
-	for(var i = 0; i < clickDrag.length; i++)
-	{
-		var k = clickX[i]*zCanvas.width + clickY[i];
+	wContext.clearRect(0,0,wCanvas.width,wCanvas.height)
+	zData = zContext.getImageData(0, 0, wCanvas.width, wCanvas.height)
+	wData = wContext.createImageData(wCanvas.width, wCanvas.height)
 
-		var red = data[k];
-		var green = data[k+1];
-		var blue = data[k+2];
-		var alpha = data[k+3];
+	for (var x = 0; x < wCanvas.width; x++) {
+		for (y = 0; y < wCanvas.height; y++) {
+			var zreal = Z_MIN_X + (Z_MAX_X - Z_MIN_X)*(x / zCanvas.width);
+			var zimg = Z_MIN_Y + (Z_MAX_Y - Z_MIN_Y)*(1-(y / zCanvas.height));
+			var inp = Complex(zreal, zimg);
+			var out = f(inp);
+			var out_re = out.real();
+			var out_im = out.imag();
 
-		var zreal = Z_MIN_X + (Z_MAX_X - Z_MIN_X)*(clickX[i]/zCanvas.width);
-		var zimg = Z_MIN_Y + (Z_MAX_Y - Z_MIN_Y)*(1-(clickY[i]/zCanvas.height));
-		var inp = Complex(zreal, zimg);
-		var out = f(inp);
-		var out_re = out.real();
-		var out_im = out.imag();
+			var out_x = Math.round(((out_re - W_MIN_X)/(W_MAX_X - W_MIN_X))*wCanvas.width)
+			var out_y = Math.round((1-((out_im - W_MIN_Y)/(W_MAX_Y - W_MIN_Y)))*wCanvas.height)
 
-		var out_x = Math.round(((out_re - W_MIN_X)/(W_MAX_X - W_MIN_X))*wCanvas.width)
-		var out_y = Math.round((1-((out_im - W_MIN_Y)/(W_MAX_Y - W_MIN_Y)))*wCanvas.height)
+			if (out_x >= 0 & out_x < wCanvas.width & out_y >= 0 & out_y < wCanvas.height) {
+				var inIndex = (y * wCanvas.width + x) * 4
+				var outIndex = (out_y * wCanvas.width + out_x) * 4
 
-		wContext.lineWidth = STROKEWIDTH;
-		wContext.lineJoin = "round";
-		if(i != 0)
-		{
-			wContext.strokeStyle = clickColor[i];
-			wContext.beginPath();
-			if(clickDrag[i])
-			{
-				if((distance(out_x,out_y,prevx,prevy)/distance(clickX[i-1],clickY[i-1],clickX[i],clickY[i]))<BRANCH_CUT_THRESHHOLD)
-					wContext.moveTo(prevx, prevy);
-				else
-					wContext.moveTo(out_x, out_y);
+				wData.data[outIndex + 0] =  zData.data[inIndex + 0]
+				wData.data[outIndex + 1] =  zData.data[inIndex + 1]
+				wData.data[outIndex + 2] =  zData.data[inIndex + 2]
+				wData.data[outIndex + 3] =  zData.data[inIndex + 3]
 			}
-			else
-			{
-				wContext.moveTo(out_x, out_y);
-			}
-			wContext.lineTo(out_x,out_y);
-			wContext.closePath();
-			wContext.stroke();
 		}
-		prevx = out_x;
-		prevy = out_y;
 	}
+
+	wContext.putImageData(wData, 0, 0)
+
+	// wContext.clearRect(0,0,wCanvas.width,wCanvas.height);
+	// wContext.lineWidth = AXISWIDTH;
+	// wContext.strokeStyle = "#000000";
+	// //axes
+	// wContext.beginPath();
+	// wContext.moveTo(0,wCanvas.height/2);
+	// wContext.lineTo(wCanvas.width,wCanvas.height/2);
+	// wContext.closePath();
+	// wContext.stroke();
+	// // other axis
+	// wContext.beginPath();
+	// wContext.moveTo(wCanvas.width/2,0);
+	// wContext.lineTo(wCanvas.width/2,wCanvas.height);
+	// wContext.closePath();
+	// wContext.stroke();
+	// //
+	// var zplane = zContext.getImageData(0,0,zCanvas.width,zCanvas.height);
+	// var data = zplane.data;
+	// var prevx = -1;
+	// var prevy = -1;
+	
+	// for(var i = 0; i < clickDrag.length; i++)
+	// {
+	// 	var k = clickX[i]*zCanvas.width + clickY[i];
+
+	// 	var red = data[k];
+	// 	var green = data[k+1];
+	// 	var blue = data[k+2];
+	// 	var alpha = data[k+3];
+
+	// 	var zreal = Z_MIN_X + (Z_MAX_X - Z_MIN_X)*(clickX[i]/zCanvas.width);
+	// 	var zimg = Z_MIN_Y + (Z_MAX_Y - Z_MIN_Y)*(1-(clickY[i]/zCanvas.height));
+	// 	var inp = Complex(zreal, zimg);
+	// 	var out = f(inp);
+	// 	var out_re = out.real();
+	// 	var out_im = out.imag();
+
+	// 	var out_x = Math.round(((out_re - W_MIN_X)/(W_MAX_X - W_MIN_X))*wCanvas.width)
+	// 	var out_y = Math.round((1-((out_im - W_MIN_Y)/(W_MAX_Y - W_MIN_Y)))*wCanvas.height)
+
+	// 	wContext.lineWidth = STROKEWIDTH;
+	// 	wContext.lineJoin = "round";
+	// 	if(i != 0)
+	// 	{
+	// 		wContext.strokeStyle = clickColor[i];
+	// 		wContext.beginPath();
+	// 		if(clickDrag[i])
+	// 		{
+	// 			if((distance(out_x,out_y,prevx,prevy)/distance(clickX[i-1],clickY[i-1],clickX[i],clickY[i]))<BRANCH_CUT_THRESHHOLD)
+	// 				wContext.moveTo(prevx, prevy);
+	// 			else
+	// 				wContext.moveTo(out_x, out_y);
+	// 		}
+	// 		else
+	// 		{
+	// 			wContext.moveTo(out_x, out_y);
+	// 		}
+	// 		wContext.lineTo(out_x,out_y);
+	// 		wContext.closePath();
+	// 		wContext.stroke();
+	// 	}
+	// 	prevx = out_x;
+	// 	prevy = out_y;
+	// }
 }
 redraw();
