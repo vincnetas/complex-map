@@ -14,7 +14,7 @@ var FRAMESIZE = Math.round(Math.min(window.innerHeight*(0.8),window.innerWidth*(
 //
 var STROKECOLOR = "#FF0000";
 //
-document.getElementById("mapping").value = "z";
+//document.getElementById("mapping").value = "(z * im(z)) - 2i";
 // z plane canvas
 var zCanvasDiv = document.getElementById('zPlaneDiv');
 var zCanvas = document.createElement('canvas');
@@ -93,7 +93,7 @@ function mapUpdate()
 	}
 	catch (err)
 	{
-		document.getElementById("mapping").value = "z";
+		document.getElementById("mapping").value = "(z * im(z)) - 2i";
 		f = function(z){
 			return z;
 		};
@@ -406,4 +406,5 @@ function wMap()
 	// 	prevy = out_y;
 	// }
 }
+mapUpdate();
 redraw();
