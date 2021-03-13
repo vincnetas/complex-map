@@ -256,19 +256,19 @@ function redraw()
 	zContext.lineWidth = AXISWIDTH;
 	zContext.strokeStyle = "#000000";
 
-	//axes
-	zContext.beginPath();
-	zContext.moveTo(0,zCanvas.height/2);
-	zContext.lineTo(zCanvas.width,zCanvas.height/2);
-	zContext.closePath();
-	zContext.stroke();
-	// other axis
-	zContext.beginPath();
-	zContext.moveTo(zCanvas.width/2,0);
-	zContext.lineTo(zCanvas.width/2,zCanvas.height);
-	zContext.closePath();
-	zContext.stroke();
-	//
+	// //axes
+	// zContext.beginPath();
+	// zContext.moveTo(0,zCanvas.height/2);
+	// zContext.lineTo(zCanvas.width,zCanvas.height/2);
+	// zContext.closePath();
+	// zContext.stroke();
+	// // other axis
+	// zContext.beginPath();
+	// zContext.moveTo(zCanvas.width/2,0);
+	// zContext.lineTo(zCanvas.width/2,zCanvas.height);
+	// zContext.closePath();
+	// zContext.stroke();
+	// //
 
 	for (var x = 0; x < zCanvas.width; x = x + 10) {
 		zContext.beginPath();
